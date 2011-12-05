@@ -1,25 +1,16 @@
 module Nesta
   module Plugin
     module Aliases
-      module Helpers
-        # Add a before filter to perform any redirects requested by individual pages
-        before do
-          this_url = AliasTable.normalize(request.fullpath)
-          table = AliasTable.all()
-          if table.has?(this_url)
-            redirect table[this_url], 301 # Always do permanent redirects
-          end
-        end
-      end
-      
+
       class AliasTable
+        @@all = nil
         
         # Cache the redirects table in a static variable
         def self.all
-          if  @@all.nil?
+          if @@all.nil?
             @@all = AliasTable.build_alias_table
           end
-          return @all
+          return @@all
         end
         
         def self.build_alias_table
@@ -40,13 +31,20 @@ module Nesta
   end
 
   class App
-    helpers Nesta::Plugin::Aliases::Helpers
+    # Add a before filter to perform any redirects requested by individual pages
+    before do
+      this_url = Plugin::Aliases::AliasTable.normalize(request.fullpath)
+      table = Plugin::Aliases::AliasTable.all()
+      if table.include?(this_url)
+        redirect table[this_url], 301 # Always do permanent redirects
+      end
+    end
   end
   
   class Page
   
     def aliases
-      if metatdata('aliases')
+      if metadata('aliases')
         return metadata('aliases').split(/\s+/) # Aliases are separated by whitespaces. Use '+' to represent a space in a URL.
       else
         return []
