@@ -29,6 +29,7 @@ module Nesta
               table[AliasTable.normalize(url)] = p.abspath
             end
           end
+          return table
         end
         
         def self.normalize(url)
