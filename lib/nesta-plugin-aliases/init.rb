@@ -16,8 +16,13 @@ module Nesta
         def self.build_alias_table
           table = {}
           Page.find_all().each do |p| 
+            dest = p.abspath
+            if p.metadata("Redirect To")
+              dest = p.metadata("Redirect To")
+              table[AliasTable.normalize(p.abspath)] = dest
+            end
             p.aliases.each  do |url| 
-              table[AliasTable.normalize(url)] = p.abspath
+              table[AliasTable.normalize(url)] = dest
             end
           end
           return table
